@@ -11,14 +11,28 @@ export const merge = (a, b) => {
   return result
 }
 
+const validValRegex = new RegExp(/^([0-9]+)(?:$|[a-z]{2})$/)
+const getNumber = val => Number(val.match(validValRegex)[1])
+const sortFnForNumbers = (a, b) => getNumber(a) - getNumber(b)
+
 // sort object-value responsive styles
 const sort = obj => {
-  const next = {}
-  Object.keys(obj).sort().forEach(key => {
-    next[key] = obj[key]
-  })
-  return next
+  const sortFn = Object.values(obj).every(val => validValRegex.test(val))
+    ? sortFnForNumbers
+    : (a, b) => a - b
+
+  return Object.keys(obj)
+    .sort(sortFn)
+    .reduce((sortedObj, key) => ({ ...sortedObj, [key]: obj[key] }), {})
 }
+
+// const sort = obj => {
+//   const next = {}
+//   Object.keys(obj).sort().forEach(key => {
+//     next[key] = obj[key]
+//   })
+//   return next
+// }
 
 const defaults = {
   breakpoints: [40, 52, 64].map(n => n + 'em'),

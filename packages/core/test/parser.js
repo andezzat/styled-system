@@ -18,7 +18,7 @@ const parser = system({
 
 test('uses default breakpoints', () => {
   const styles = parser({
-    theme: theme,
+    theme,
     fontSize: [1, 2, 3],
     color: ['primary', null, 'secondary'],
   })
@@ -100,7 +100,7 @@ test('uses dynamically changed breakpoints', () => {
   })
 
   const thirdStyles = parser({
-    theme: theme,
+    theme,
     fontSize: [1, 2, 3],
     color: ['primary', null, 'secondary'],
   })
@@ -115,4 +115,63 @@ test('uses dynamically changed breakpoints', () => {
       color: 'papayawhip',
     },
   })
+})
+
+test('sorts breakpoint mediaQueries correctly', () => {
+  const breakpoints = ['480px', '768px', '1024px']
+  breakpoints.sm = breakpoints[0]
+  breakpoints.md = breakpoints[1]
+  breakpoints.lg = breakpoints[2]
+
+  expect(
+    JSON.stringify(parser({
+      theme: {
+        ...theme,
+        breakpoints,
+        // disableStyledSystemCache: true,
+      },
+      fontSize: { _: 1, sm: 2, lg: 4 },
+      color: { _: 'primary', md: 'grey', lg: 'secondary' },
+    }))
+  ).toEqual(JSON.stringify({
+    fontSize: 4,
+    color: 'rebeccapurple',
+    '@media screen and (min-width: 480px)': {
+      fontSize: 8,
+    },
+    '@media screen and (min-width: 768px)': {
+      color: 'rebeccapurple',
+    },
+    '@media screen and (min-width: 1024px)': {
+      fontSize: 32,
+    },
+  }))
+
+  // expect(
+  //   JSON.stringify(parser({
+  //     theme: {
+  //       ...theme,
+  //       breakpoints: ['480px', '768px', '1024px'],
+  //       disableStyledSystemCache: true,
+  //     },
+  //     fontSize: [1, 2, null, 4],
+  //     color: ['primary', null, null, 'secondary'],
+  //   }))
+  // ).toEqual(JSON.stringify({
+  //   fontSize: 4,
+  //   color: 'rebeccapurple',
+  //   '@media screen and (min-width: 480px)': {
+  //     fontSize: 8,
+  //   },
+  //   '@media screen and (min-width: 768px)': {
+
+  //   },
+  //   '@media screen and (min-width: 50em)': {
+  //     fontSize: 16,
+  //   },
+  //   '@media screen and (min-width: 100em)': {
+  //     fontSize: 32,
+  //     color: 'papayawhip',
+  //   },
+  // }))
 })
